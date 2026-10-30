@@ -1,0 +1,314 @@
+#!/usr/bin/env bash
+# agent-rules — keep one copy of the agent rules shared by every repo, plus a
+# set of rules for every agent on this Mac.
+#
+#   agent-rules install-global      write global/ into ~/.claude/CLAUDE.md and ~/.codex/AGENTS.md
+#   agent-rules uninstall-global    remove that managed block again
+#   agent-rules install  <repo>     set a repo up: Makefile `rules` target, AGENTS.md/CLAUDE.md if missing, first sync
+#   agent-rules sync     <repo>     copy docs/rules/ into <repo>/docs/rules/
+#   agent-rules check    <repo>     report what `sync` would change (exit 1 if anything)
+#   agent-rules sync-all [root]     sync every repo under root (default ~/Sites) that was installed
+#
+# Repos get committed copies, not symlinks: agents working from a fresh clone
+# (cloud sessions, CI, backlog-mode runs) never see anything outside the repo,
+# and a missing rule fails silently. Each copy carries a header with the
+# agent-rules commit it came from and a hash of its own body, so a local edit
+# is detected instead of being overwritten.
+#
+# Global rules are different: they're per-machine by definition, so Claude's
+# file @-imports them from this checkout (edits apply immediately). Codex
+# can't follow imports, so its file gets a concatenated copy; rerun
+# install-global after editing global/.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RULES_DIR="$ROOT/docs/rules"
+GLOBAL_DIR="$ROOT/global"
+TEMPLATES_DIR="$ROOT/templates"
+
+BEGIN_MARK="<!-- agent-rules:begin -->"
+END_MARK="<!-- agent-rules:end -->"
+HEADER_TAG="agent-rules:synced"
+
+die() { echo "agent-rules: $*" >&2; exit 1; }
+note() { echo "  $*"; }
+
+version() {
+  local sha
+  sha="$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null)" || sha="uncommitted"
+  if [ -n "$(git -C "$ROOT" status --porcelain -- docs/rules global 2>/dev/null)" ]; then
+    sha="$sha-dirty"
+  fi
+  echo "$sha"
+}
+
+body_hash() { shasum -a 256 | cut -c1-12; }
+
+# A synced file is "<header line>\n<body>". These read either part.
+header_of() { head -n 1 "$1"; }
+body_of() { tail -n +2 "$1"; }
+is_synced() { [ -f "$1" ] && header_of "$1" | grep -q "$HEADER_TAG"; }
+recorded_hash() { header_of "$1" | sed -n 's/.*sha256:\([0-9a-f]*\).*/\1/p'; }
+
+rule_files() { find "$RULES_DIR" -maxdepth 1 -name '*.md' -type f | sort; }
+
+repo_path() {
+  local repo="${1:-}"
+  [ -n "$repo" ] || die "missing repo path (e.g. REPO=~/Sites/inertia)"
+  [ -d "$repo" ] || die "no such directory: $repo"
+  (cd "$repo" && pwd)
+}
+
+# Replace the text between the begin/end markers in $1 with stdin. Returns 1
+# (and changes nothing) when the file has no markers.
+replace_block() {
+  local file="$1" block tmp
+  block="$(cat)"
+  grep -qF "$BEGIN_MARK" "$file" && grep -qF "$END_MARK" "$file" || return 1
+  tmp="$(mktemp)"
+  BLOCK="$block" awk -v b="$BEGIN_MARK" -v e="$END_MARK" '
+    index($0, b) { print; print ENVIRON["BLOCK"]; skip = 1; next }
+    index($0, e) { skip = 0 }
+    !skip { print }
+  ' "$file" > "$tmp"
+  cat "$tmp" > "$file"
+  rm -f "$tmp"
+}
+
+# ── Repos ────────────────────────────────────────────────────────────────────
+
+# Walk every upstream rule and every synced file in the repo, calling
+# $action for each difference. Used by both sync and check so they can never
+# disagree about what's out of date.
+#   action <kind> <name> [<target>]   kind: add|update|edited|unmanaged|stale
+plan() {
+  local repo="$1" action="$2" dest="$1/docs/rules" src name target want
+  for src in $(rule_files); do
+    name="$(basename "$src")"
+    target="$dest/$name"
+    want="$(body_hash < "$src")"
+    if [ ! -e "$target" ]; then
+      "$action" add "$name" "$src"
+    elif ! is_synced "$target"; then
+      "$action" unmanaged "$name" "$src"
+    elif [ "$(body_of "$target" | body_hash)" != "$(recorded_hash "$target")" ]; then
+      "$action" edited "$name" "$src"
+    elif [ "$(recorded_hash "$target")" != "$want" ]; then
+      "$action" update "$name" "$src"
+    fi
+  done
+  [ -d "$dest" ] || return 0
+  for target in "$dest"/*.md; do
+    [ -e "$target" ] || continue
+    name="$(basename "$target")"
+    if is_synced "$target" && [ ! -e "$RULES_DIR/$name" ]; then
+      "$action" stale "$name" "$target"
+    fi
+  done
+}
+
+write_synced() {
+  local src="$1" target="$2" name
+  name="$(basename "$src")"
+  {
+    echo "<!-- $HEADER_TAG from agent-rules@$(version) sha256:$(body_hash < "$src"). Edit agent-rules/docs/rules/$name, then run \`make rules\`; local edits here are not kept. -->"
+    cat "$src"
+  } > "$target"
+}
+
+SYNC_FORCE="${FORCE:-}"
+SYNC_PROBLEMS=0
+do_sync() {
+  local kind="$1" name="$2" path="$3" target="$SYNC_DEST/$2"
+  case "$kind" in
+    add|update) write_synced "$path" "$target"; note "$kind  $name" ;;
+    edited)
+      if [ -n "$SYNC_FORCE" ]; then write_synced "$path" "$target"; note "overwrote local edits  $name"
+      else note "SKIPPED $name: edited locally (move the change into agent-rules, or FORCE=1 to discard it)"; SYNC_PROBLEMS=1; fi ;;
+    unmanaged)
+      note "SKIPPED $name: a project file with the same name exists (rename it into docs/project/, then sync again)"; SYNC_PROBLEMS=1 ;;
+    stale) rm -f "$path"; note "removed $name (no longer in agent-rules)" ;;
+  esac
+}
+
+do_check() {
+  local kind="$1" name="$2"
+  case "$kind" in
+    add) note "missing   $name" ;;
+    update) note "outdated  $name" ;;
+    edited) note "edited locally  $name" ;;
+    unmanaged) note "name clash with a project file  $name" ;;
+    stale) note "no longer upstream  $name" ;;
+  esac
+  CHECK_FOUND=1
+}
+
+# The AGENTS.md loader block: one @-import per synced rule, so a rule added
+# to agent-rules is loaded everywhere on the next `make rules`.
+loader_block() {
+  local repo="$1" f
+  echo "Shared rules from agent-rules, synced by \`make rules\`. Don't edit them here; docs/project/ holds this repo's settings and facts, not rules."
+  echo
+  # project-settings.md says to read it first; everything else is alphabetical.
+  local first="$repo/docs/rules/project-settings.md"
+  is_synced "$first" && echo "@docs/rules/project-settings.md"
+  for f in "$repo"/docs/rules/*.md; do
+    [ -e "$f" ] && [ "$f" != "$first" ] || continue
+    is_synced "$f" && echo "@docs/rules/$(basename "$f")"
+  done
+  return 0
+}
+
+cmd_sync() {
+  local repo
+  repo="$(repo_path "${1:-}")"
+  SYNC_DEST="$repo/docs/rules"
+  mkdir -p "$SYNC_DEST"
+  echo "Syncing agent-rules@$(version) into $repo"
+  plan "$repo" do_sync
+  if [ -f "$repo/AGENTS.md" ]; then
+    if loader_block "$repo" | replace_block "$repo/AGENTS.md"; then
+      note "updated AGENTS.md loader"
+    else
+      note "AGENTS.md has no $BEGIN_MARK block, so it wasn't touched; see templates/AGENTS.md"
+    fi
+  fi
+  [ "$SYNC_PROBLEMS" = 0 ] || exit 1
+}
+
+cmd_check() {
+  local repo
+  repo="$(repo_path "${1:-}")"
+  CHECK_FOUND=0
+  echo "Checking $repo against agent-rules@$(version)"
+  plan "$repo" do_check
+  if [ "$CHECK_FOUND" = 0 ]; then note "up to date"; else exit 1; fi
+}
+
+MAKE_SNIPPET='
+##@ Agent rules
+
+AGENT_RULES ?= $(HOME)/Sites/agent-rules
+
+rules: ## Sync shared agent rules from agent-rules into docs/rules/
+	@$(AGENT_RULES)/bin/agent-rules sync "$(CURDIR)"
+
+rules-check: ## Show what `make rules` would change (exit 1 if anything)
+	@$(AGENT_RULES)/bin/agent-rules check "$(CURDIR)"
+'
+
+cmd_install() {
+  local repo
+  repo="$(repo_path "${1:-}")"
+  echo "Installing agent-rules into $repo"
+  mkdir -p "$repo/docs/rules" "$repo/docs/project"
+
+  if [ ! -f "$repo/AGENTS.md" ]; then
+    sed "s/__PROJECT__/$(basename "$repo")/" "$TEMPLATES_DIR/AGENTS.md" > "$repo/AGENTS.md"
+    note "created AGENTS.md"
+  elif ! grep -qF "$BEGIN_MARK" "$repo/AGENTS.md"; then
+    note "AGENTS.md already exists without a loader block. Add these two lines where the shared rules should load, then run \`make rules\`:"
+    note "    $BEGIN_MARK"
+    note "    $END_MARK"
+  fi
+  if [ ! -e "$repo/CLAUDE.md" ]; then
+    cp "$TEMPLATES_DIR/CLAUDE.md" "$repo/CLAUDE.md"
+    note "created CLAUDE.md"
+  fi
+  if [ -f "$TEMPLATES_DIR/settings.md" ] && [ ! -e "$repo/docs/project/settings.md" ]; then
+    cp "$TEMPLATES_DIR/settings.md" "$repo/docs/project/settings.md"
+    note "created docs/project/settings.md (set its platforms; see docs/rules/project-settings.md)"
+  fi
+
+  if [ ! -f "$repo/Makefile" ]; then
+    printf '.PHONY: rules rules-check\n%s' "$MAKE_SNIPPET" > "$repo/Makefile"
+    note "created Makefile with \`make rules\`"
+  elif grep -qE '^rules:' "$repo/Makefile"; then
+    note "Makefile already has a \`rules\` target"
+  else
+    printf '%s' "$MAKE_SNIPPET" >> "$repo/Makefile"
+    note "added \`make rules\` and \`make rules-check\` to Makefile"
+  fi
+
+  cmd_sync "$repo"
+}
+
+cmd_sync_all() {
+  local root="${1:-$HOME/Sites}" dir failed=0
+  for dir in "$root"/*/; do
+    dir="${dir%/}"
+    [ "$dir" = "$ROOT" ] && continue
+    ls "$dir"/docs/rules/*.md >/dev/null 2>&1 || continue
+    grep -lq "$HEADER_TAG" "$dir"/docs/rules/*.md 2>/dev/null || continue
+    ( cmd_sync "$dir" ) || failed=1
+    echo
+  done
+  return $failed
+}
+
+# ── This Mac ─────────────────────────────────────────────────────────────────
+
+global_files() { find "$GLOBAL_DIR" -maxdepth 1 -name '*.md' -type f | sort; }
+
+# Write $2 (stdin) into the managed block of $1, creating the file (or the
+# block, appended after any existing text) if needed. Backs up a pre-existing
+# file once before the first change.
+write_managed() {
+  local file="$1" block
+  block="$(cat)"
+  mkdir -p "$(dirname "$file")"
+  if [ -f "$file" ] && printf '%s\n' "$block" | replace_block "$file"; then
+    return 0
+  fi
+  if [ -s "$file" ]; then
+    cp "$file" "$file.before-agent-rules"
+    note "backed up existing $file to $file.before-agent-rules"
+    printf '\n' >> "$file"
+  fi
+  printf '%s\n%s\n%s\n' "$BEGIN_MARK" "$block" "$END_MARK" >> "$file"
+}
+
+cmd_install_global() {
+  local claude="${CLAUDE_HOME:-$HOME/.claude}/CLAUDE.md"
+  local codex="${CODEX_HOME:-$HOME/.codex}/AGENTS.md"
+  local f
+  [ -n "$(global_files)" ] || die "no rules in $GLOBAL_DIR"
+  echo "Installing global rules from $GLOBAL_DIR"
+
+  {
+    echo "Global agent rules for this Mac, managed by $ROOT (\`make install\` there). Project rules win where they conflict."
+    echo
+    for f in $(global_files); do echo "@$f"; done
+  } | write_managed "$claude"
+  note "Claude: $claude (imports global/, edits apply immediately)"
+
+  {
+    echo "Global agent rules for this Mac, copied from $ROOT/global by \`make install\` there (agent-rules@$(version)). Edit them there and reinstall; project rules win where they conflict."
+    for f in $(global_files); do echo; cat "$f"; done
+  } | write_managed "$codex"
+  note "Codex:  $codex (a copy; rerun \`make install\` after editing global/)"
+}
+
+cmd_uninstall_global() {
+  local file
+  for file in "${CLAUDE_HOME:-$HOME/.claude}/CLAUDE.md" "${CODEX_HOME:-$HOME/.codex}/AGENTS.md"; do
+    [ -f "$file" ] && grep -qF "$BEGIN_MARK" "$file" || continue
+    awk -v b="$BEGIN_MARK" -v e="$END_MARK" '
+      index($0, b) { skip = 1; next }
+      index($0, e) { skip = 0; next }
+      !skip { print }
+    ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+    if [ -z "$(tr -d '[:space:]' < "$file")" ]; then rm -f "$file"; note "removed $file"
+    else note "removed the agent-rules block from $file (kept your own text)"; fi
+  done
+}
+
+case "${1:-}" in
+  install-global) cmd_install_global ;;
+  uninstall-global) cmd_uninstall_global ;;
+  install) cmd_install "${2:-}" ;;
+  sync) cmd_sync "${2:-}" ;;
+  check) cmd_check "${2:-}" ;;
+  sync-all) cmd_sync_all "${2:-}" ;;
+  *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac
