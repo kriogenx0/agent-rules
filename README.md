@@ -2,6 +2,8 @@
 
 The purpose of this repo is to keep all shared agent rules in one place. This repo should never contain information about a specific codebase or repo.
 
+Author: Alex Vaos
+
 ## How rules are split
 
 - **Shared rules** live here in [docs/rules/](docs/rules/). They are project-agnostic: no stack, library, host or command specifics.
@@ -30,7 +32,13 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 - [feature-docs.md](docs/rules/feature-docs.md): what goes in a `docs/features/` doc.
 - [deployment.md](docs/rules/deployment.md): hands off production and the general deployment standard.
 - [make-files.md](docs/rules/make-files.md): standard make targets.
-- [versioning.md](docs/rules/versioning.md): semver in `VERSION`, bumped only by `make release`.
+- [versioning.md](docs/rules/versioning.md): semver in a project's `VERSION` file, bumped only by `make release`.
+
+## Versioning
+
+The rules are versioned by semver git tags (`v1.1.0`); there is no `VERSION` file. Each synced file's header records the version and commit it came from (`agent-rules@1.1.0 (abc1234)`, or `1.1.0+2` when synced from two commits past the tag), and installing into a repo shows it. `make version` prints the current one.
+
+`make release` is the only way to make a version. It runs the tests, tags the current commit with the next version, and pushes the tag. It refuses uncommitted changes and a commit that is already released. The default is a patch bump; pass `BUMP=minor` or `BUMP=major` for more. Then run `make sync-all` to send the release to every repo. As a guide: patch for fixes and wording, minor for new or changed rules, major is the author's call.
 
 ## Sources
 

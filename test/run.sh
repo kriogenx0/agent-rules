@@ -13,6 +13,7 @@ AR="$WORK/agent-rules"
 mkdir -p "$AR"
 cp -R "$SRC/bin" "$SRC/docs" "$SRC/global" "$SRC/templates" "$AR/"
 git -C "$AR" init -q && git -C "$AR" add -A && git -C "$AR" -c user.name=t -c user.email=t@t commit -qm init
+git -C "$AR" -c user.name=t -c user.email=t@t tag -a v1.0.0 -m v1.0.0
 CLI="$AR/bin/agent-rules"
 export CLAUDE_HOME="$WORK/home/.claude" CODEX_HOME="$WORK/home/.codex"
 
@@ -26,7 +27,8 @@ nrules() { ls "$AR"/docs/rules/*.md | wc -l | tr -d ' '; }
 
 # ── install into a fresh repo ──
 R="$WORK/repo"; mkdir -p "$R"
-expect "install into a fresh repo succeeds" "$CLI" install "$R"
+OUT="$("$CLI" install "$R" 2>&1)" && ok || bad "install into a fresh repo succeeds"
+grep -qF "Installed agent-rules 1.0.0 (" <<< "$OUT" && ok || bad "install shows the version"
 expect "AGENTS.md created" test -f "$R/AGENTS.md"
 expect "CLAUDE.md imports AGENTS.md" grep -qx "@AGENTS.md" "$R/CLAUDE.md"
 expect "docs/project created" test -d "$R/docs/project"
@@ -60,7 +62,7 @@ git -C "$AR" -c user.name=t -c user.email=t@t commit -qam change
 expect_not "check reports an outdated rule" "$CLI" check "$R"
 "$CLI" sync "$R" >/dev/null 2>&1
 expect "sync pulls the upstream change" grep -q "new upstream line" "$R/docs/rules/conventions.md"
-expect "header records the new commit" grep -q "agent-rules@$(git -C "$AR" rev-parse --short HEAD) " "$R/docs/rules/conventions.md"
+expect "header records the version and commit" grep -qF "agent-rules@1.0.0+1 ($(git -C "$AR" rev-parse --short HEAD)) " "$R/docs/rules/conventions.md"
 
 # ── new and removed upstream rules ──
 printf '## Brand new\n' > "$AR/docs/rules/brand-new.md"
@@ -94,6 +96,25 @@ git -C "$AR" -c user.name=t -c user.email=t@t commit -qam change2
 "$CLI" sync-all "$WORK" >/dev/null 2>&1
 expect "sync-all updates installed repos" grep -q "second upstream line" "$R/docs/rules/conventions.md"
 [ "$(ls "$U/docs/rules")" = "x.md" ] && ok || bad "sync-all leaves uninstalled repos alone"
+
+# ── releases ──
+tagged() { git -C "$AR" rev-parse -q --verify "refs/tags/$1" >/dev/null 2>&1; }
+echo "- uncommitted" >> "$AR/docs/rules/conventions.md"
+expect_not "release refuses a dirty tree" "$CLI" release
+git -C "$AR" checkout -q -- docs/rules/conventions.md
+expect "release succeeds on a clean tree" "$CLI" release
+expect "patch release tags HEAD" tagged v1.0.1
+[ "$(git -C "$AR" rev-parse v1.0.1^{commit})" = "$(git -C "$AR" rev-parse HEAD)" ] && ok || bad "the tag is on HEAD"
+expect_not "release refuses an already-released commit" "$CLI" release
+echo "- third upstream line" >> "$AR/docs/rules/conventions.md"
+git -C "$AR" -c user.name=t -c user.email=t@t commit -qam change3
+expect_not "release rejects an unknown part" "$CLI" release huge
+expect "minor release succeeds" "$CLI" release minor
+expect "minor release resets the patch" tagged v1.1.0
+expect "version shows the latest tag" sh -c "'$CLI' version | grep -q '^1.1.0 ('"
+echo "- fourth upstream line" >> "$AR/docs/rules/conventions.md"
+git -C "$AR" -c user.name=t -c user.email=t@t commit -qam change4
+expect "version counts commits past the tag" sh -c "'$CLI' version | grep -q '^1.1.0+1 ('"
 
 # ── global install ──
 mkdir -p "$CLAUDE_HOME"; printf 'My own note.\n' > "$CLAUDE_HOME/CLAUDE.md"

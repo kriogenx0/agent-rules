@@ -4,7 +4,7 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: all help install uninstall install-repo sync check sync-all test
+.PHONY: all help install uninstall install-repo sync check sync-all test version release
 
 CLI := $(CURDIR)/bin/agent-rules
 
@@ -40,6 +40,14 @@ check: ## Show what a sync would change: make check REPO=~/Sites/name
 
 sync-all: ## Sync every installed repo under ~/Sites (ROOT=dir to change)
 	@$(CLI) sync-all "$(ROOT)"
+
+##@ Releases
+
+version: ## Print the rules version and commit
+	@$(CLI) version
+
+release: test ## Test, then tag the next version and push it: make release BUMP=patch|minor|major (default patch)
+	@$(CLI) release "$(BUMP)"
 
 ##@ Development
 

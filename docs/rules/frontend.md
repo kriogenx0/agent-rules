@@ -38,13 +38,13 @@ API calls are organized by the API they integrate with. There is a base client, 
 #### UI Components
 Common recurring pieces (buttons, inputs, text fields, selects, dropdowns, checkboxes, radios, form elements, modals, panes, cards, and so on) live in their own files in a shared UI components folder. Before adding markup for one of these, use or extend the existing component.
 - Each component has its own stylesheet, and its own script when it needs one to work (a modal, not a button).
-- A component's root element has a class prefixed `ui-` (`ui-button`, `ui-modal`).
+- A component's root element (its outermost, parent-most element) has a class prefixed `ui-` (`ui-button`, `ui-modal`). Only the root needs the prefix; its children can use any class names.
 - Every UI component supports light and dark mode.
 - Anything the user can interact with has at least a subtle hover state; things they can't interact with shouldn't have one.
 - Typography and spacing come from the theme scale, not one-off values. Typography is defined in one stylesheet, and margins and padding in one stylesheet.
 
 #### Views
-Every page is its own view, in a views directory. A view's folder holds every file for it (markup, scripts, styles) and its page-specific components; shared components stay in a shared folder. A view's root element has a lowercase class prefixed `view-` (`view-studies-list`), and its stylesheet may override UI component styles. Areas for different roles or "realms" each get their own folder inside the views directory, unless there is only one. A view sets its own page title where it makes sense.
+Every page is its own view, in a views directory. A view's folder holds every file for it (markup, scripts, styles) and its page-specific components; shared components stay in a shared folder. A view's root element (its outermost, parent-most element) has a lowercase class prefixed `view-` (`view-studies-list`). Only the root needs the prefix; its children can use any class names. The view's stylesheet may override UI component styles. Areas for different roles or "realms" each get their own folder inside the views directory, unless there is only one. A view sets its own page title where it makes sense.
 
 #### Library Utilities
 Pure helper functions that aren't tied to one data entity live in a shared "util" folder.

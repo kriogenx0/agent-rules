@@ -8,6 +8,8 @@
 #   agent-rules sync     <repo>     copy docs/rules/ into <repo>/docs/rules/
 #   agent-rules check    <repo>     report what `sync` would change (exit 1 if anything)
 #   agent-rules sync-all [root]     sync every repo under root (default ~/Sites) that was installed
+#   agent-rules version             print the rules version (latest v* tag) and commit
+#   agent-rules release [part]      tag HEAD with the next version (patch, minor or major) and push the tag
 #
 # Repos get committed copies, not symlinks: agents working from a fresh clone
 # (cloud sessions, CI, backlog-mode runs) never see anything outside the repo,
@@ -33,13 +35,24 @@ HEADER_TAG="agent-rules:synced"
 die() { echo "agent-rules: $*" >&2; exit 1; }
 note() { echo "  $*"; }
 
+# The rules are versioned by git tags (v<major>.<minor>.<patch>), made only
+# by `release`. Synced headers and messages carry the version and the exact
+# commit; "1.1.0+3" means three commits past the v1.1.0 tag.
+latest_tag() { git -C "$ROOT" describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' 2>/dev/null; }
+semver() {
+  local tag ahead
+  tag="$(latest_tag)" || { echo "0.0.0"; return; }
+  ahead="$(git -C "$ROOT" rev-list --count "$tag..HEAD")"
+  if [ "$ahead" = 0 ]; then echo "${tag#v}"; else echo "${tag#v}+$ahead"; fi
+}
+
 version() {
   local sha
   sha="$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null)" || sha="uncommitted"
   if [ -n "$(git -C "$ROOT" status --porcelain -- docs/rules global 2>/dev/null)" ]; then
     sha="$sha-dirty"
   fi
-  echo "$sha"
+  echo "$(semver) ($sha)"
 }
 
 body_hash() { shasum -a 256 | cut -c1-12; }
@@ -200,7 +213,7 @@ rules-check: ## Show what `make rules` would change (exit 1 if anything)
 cmd_install() {
   local repo
   repo="$(repo_path "${1:-}")"
-  echo "Installing agent-rules into $repo"
+  echo "Installing agent-rules $(version) into $repo"
   mkdir -p "$repo/docs/rules" "$repo/docs/project"
 
   if [ ! -f "$repo/AGENTS.md" ]; then
@@ -231,6 +244,7 @@ cmd_install() {
   fi
 
   cmd_sync "$repo"
+  echo "Installed agent-rules $(version) in $repo"
 }
 
 cmd_sync_all() {
@@ -244,6 +258,36 @@ cmd_sync_all() {
     echo
   done
   return $failed
+}
+
+# ── Releases ─────────────────────────────────────────────────────────────────
+
+# Tag HEAD with the next version (v<version>, annotated) and push the tag
+# when there's a remote. Refuses to run with uncommitted changes or on a
+# commit that is already released, so a release is always exactly a
+# committed tree. `make release` runs the tests first.
+cmd_release() {
+  local part="${1:-patch}" tag cur major minor patch next
+  tag="$(latest_tag)" || tag="v0.0.0"
+  cur="${tag#v}"
+  [[ "$cur" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || die "latest tag is not semver: $tag"
+  major="${BASH_REMATCH[1]}" minor="${BASH_REMATCH[2]}" patch="${BASH_REMATCH[3]}"
+  case "$part" in
+    patch) next="$major.$minor.$((patch + 1))" ;;
+    minor) next="$major.$((minor + 1)).0" ;;
+    major) next="$((major + 1)).0.0" ;;
+    *) die "release takes patch, minor or major, not: $part" ;;
+  esac
+  [ -z "$(git -C "$ROOT" status --porcelain)" ] || die "commit or stash your changes first; a release is a committed tree"
+  [ "$(semver)" = "$cur" ] && [ "$tag" != v0.0.0 ] && die "HEAD is already released as $tag"
+  git -C "$ROOT" rev-parse -q --verify "refs/tags/v$next" >/dev/null && die "tag v$next already exists"
+  git -C "$ROOT" tag -a "v$next" -m "agent-rules v$next"
+  echo "Released agent-rules v$next ($cur -> $next)"
+  if git -C "$ROOT" remote get-url origin >/dev/null 2>&1; then
+    git -C "$ROOT" push -q origin "v$next"
+    note "pushed tag v$next to origin"
+  fi
+  note "run \`make sync-all\` to send it to every repo"
 }
 
 # ── This Mac ─────────────────────────────────────────────────────────────────
@@ -273,7 +317,7 @@ cmd_install_global() {
   local codex="${CODEX_HOME:-$HOME/.codex}/AGENTS.md"
   local f
   [ -n "$(global_files)" ] || die "no rules in $GLOBAL_DIR"
-  echo "Installing global rules from $GLOBAL_DIR"
+  echo "Installing global rules from agent-rules $(version) ($GLOBAL_DIR)"
 
   {
     echo "Global agent rules for this Mac, managed by $ROOT (\`make install\` there). Project rules win where they conflict."
@@ -310,5 +354,7 @@ case "${1:-}" in
   sync) cmd_sync "${2:-}" ;;
   check) cmd_check "${2:-}" ;;
   sync-all) cmd_sync_all "${2:-}" ;;
-  *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  version) version ;;
+  release) cmd_release "${2:-}" ;;
+  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac
