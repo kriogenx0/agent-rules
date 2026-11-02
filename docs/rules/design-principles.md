@@ -7,7 +7,7 @@ They apply to every page, feature and backlog task; a task isn't done until it m
 3. **Interactive things react to the cursor; nothing else does.** Anything clickable changes when the cursor is over it. Anything that isn't clickable doesn't change on hover.
 4. **View hierarchy: Global, then App, then View.** Libraries and global styles are the base, app-wide changes sit on top, and each view overrides what it inherits (see Styles in [frontend.md](frontend.md)).
 5. **Text never touches the edge of the viewport.** Text at the edge looks cut off; use margin or padding to keep it in.
-6. **Animations are fast (150ms).** Longer animations distract.
+6. **Animations last 150ms to 300ms.** Under 150ms is too quick to notice as an animation. Over 300ms starts to feel slow, and over 500ms is annoying to wait for, so never go past it.
 7. **Hover and other state changes never change an element's size or position**, since that makes clicking glitchy. The only exception is when the hover or click mask stays the same.
 8. **UI text that no one would select isn't selectable**: buttons, dropdowns, icons.
 9. **Views only show things of value.** For example, don't show pagination when there's only one page.
