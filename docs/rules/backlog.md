@@ -56,7 +56,7 @@ The `/docs/backlog/` directory contains specifications for incomplete work. Each
 - Avoid modifying shared configuration or infrastructure files unless required.
 - Prefer tasks that affect different components when multiple agents are working concurrently.
 - Coordinate overlapping changes through Git branches and pull requests.
-- Rebase or merge against the latest main branch and rerun relevant tests before merging.
+- Rebase onto the latest main branch and rerun relevant tests before merging, then rebase merge (see Branches in [conventions.md](conventions.md)).
 
 ### Guiding Principles
 

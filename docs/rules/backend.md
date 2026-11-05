@@ -2,6 +2,14 @@
 
 Ignore this document if this is not a backend application.
 
+#### Architecture
+Prefer **MVCS (Model–View–Controller–Service)** for backend applications, following the framework's conventions. Use a service layer for business workflows without rewriting working code solely to adopt this structure.
+
+- **Models** own persistence, entity relationships, and entity-specific data rules. Keep database queries here.
+- **Views** own presentation, including templates and API response formatting. For JSON APIs, serializers can fill this role.
+- **Controllers** handle HTTP concerns: parse and validate requests, enforce request-level access checks, call services, and return responses. Keep them thin.
+- **Services** implement business use cases and coordinate models, transactions, and external integrations. Keep them independent of HTTP request and response objects so jobs, commands, and controllers can reuse them. Test business workflows at this layer and HTTP behavior with request tests.
+
 #### Health Checks and Smoke Tests
 Backends expose health checks and smoke tests at URLs:
 - `/health` is the liveness probe: 200 with a body of `OK`.

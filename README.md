@@ -14,7 +14,7 @@ Each repo copies `docs/rules/` from here and keeps its own `docs/project/`. Its 
 Every repo also keeps `docs/project/settings.md` (start from [templates/settings.md](templates/settings.md)), which records:
 
 - **Platforms:** which of frontend, backend, mac, iOS the repo is for. Only rules for those platforms apply.
-- **Prototyping mode:** `on` means no branches, no PRs, just work from main and push to main.
+- **Prototyping mode:** `on` means ordinary changes go directly to main; backlog tasks use branches, and completed ones merge to main automatically.
 
 ## Rules
 
@@ -28,7 +28,7 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 - [documentation.md](docs/rules/documentation.md): where docs live and what they must cover.
 - [backlog.md](docs/rules/backlog.md): how backlog tasks (`docs/backlog/`) are written, picked up, and completed.
 - [backlog-mode.md](docs/rules/backlog-mode.md): the autonomous branch-per-task mode used when told to "work on the backlog".
-- [prototyping-mode.md](docs/rules/prototyping-mode.md): when the user says it's on, no branches or PRs; commit and push everything to main.
+- [prototyping-mode.md](docs/rules/prototyping-mode.md): when the user says it's on, push ordinary changes to main and automatically merge completed backlog branches; keep incomplete tasks on branches.
 - [feature-docs.md](docs/rules/feature-docs.md): what goes in a `docs/features/` doc.
 - [deployment.md](docs/rules/deployment.md): hands off production and the general deployment standard.
 - [make-files.md](docs/rules/make-files.md): standard make targets.
@@ -37,6 +37,8 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 ## Versioning
 
 The rules are versioned by semver git tags (`v1.1.0`); there is no `VERSION` file. Each synced file's header records the version and commit it came from (`agent-rules@1.1.0 (abc1234)`, or `1.1.0+2` when synced from two commits past the tag), and installing into a repo shows it. `make version` prints the current one.
+
+Every commit that changes these shared rules must receive a version bump. After committing, run `make release` before considering the change finished; use a patch bump for fixes and wording, a minor bump for new or changed rules, and a major bump only at the author's direction. This requirement is specific to this repository.
 
 `make release` is the only way to make a version. It runs the tests, tags the current commit with the next version, and pushes the tag. It refuses uncommitted changes and a commit that is already released. The default is a patch bump; pass `BUMP=minor` or `BUMP=major` for more. Then run `make sync-all` to send the release to every repo. As a guide: patch for fixes and wording, minor for new or changed rules, major is the author's call.
 

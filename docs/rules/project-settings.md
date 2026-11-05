@@ -22,4 +22,4 @@ Apply only the rules for the listed platforms: [backend.md](backend.md) for `bac
 
 ### Prototyping mode
 
-`on` or `off` (default `off`). When `on`, [prototyping-mode.md](prototyping-mode.md) applies for every session in the repo: no branches, no PRs, work from main and push to main. The user can also switch it on or off for one session by saying so; that overrides the file for that session only. Change the file only when the user asks.
+`on` or `off` (default `off`). When `on`, [prototyping-mode.md](prototyping-mode.md) applies for every session in the repo: ordinary changes go directly to main without PRs; backlog tasks use branches, automatically merging completed tasks while keeping incomplete work on its branch. The user can also switch it on or off for one session by saying so; that overrides the file for that session only. Change the file only when the user asks.
