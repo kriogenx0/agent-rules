@@ -13,3 +13,4 @@ They apply to every page, feature and backlog task; a task isn't done until it m
 9. **Views only show things of value.** For example, don't show pagination when there's only one page.
 10. **No invisible masks or state changes.** The area where a control changes state (hover, click, mouse cursor) matches its visible boundary. For example, hovering or clicking anywhere inside a text field's border, including its padding, changes the text field's state.
 11. **Show that something is happening.** When the user is waiting on something, give a subtle indication that it's in progress.
+12. Common actions can use icons instead of text. Buttons with uncommon icons should have a tooltip to show the action or intent.
