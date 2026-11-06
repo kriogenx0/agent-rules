@@ -1,6 +1,6 @@
 ## Backlog Mode
 
-Applies when the user says to work on the backlog (unless [prototyping-mode.md](prototyping-mode.md) is on, which replaces its merge and PR rules). It adds an autonomous, branch-per-task workflow on top of [backlog.md](backlog.md); where the two overlap, backlog.md's rules on task files still hold.
+Applies when the user says to work on the backlog or runs the `work` special command (see Special commands below), unless [prototyping-mode.md](prototyping-mode.md) is on, which replaces its merge and PR rules. It adds an autonomous, branch-per-task workflow on top of [backlog.md](backlog.md); where the two overlap, backlog.md's rules on task files still hold.
 
 Don't stop to ask which task to take or to confirm scope. Work through the tasks in `docs/backlog/` one at a time, highest priority first (`p0` before `p1`, and so on), skipping tasks whose `depends_on` files are still in `docs/backlog/`. Before starting each task, check for `docs/backlog/.stop`; if it exists (the user creates it with `touch`), finish and commit the current task, then stop:
 
@@ -11,7 +11,7 @@ Don't stop to ask which task to take or to confirm scope. Work through the tasks
 - **Build the conservative version.** When a call is genuinely the user's, build the cautious option behind the blocker note rather than guessing silently, and document the choice in the feature doc.
 - **Keep going until the user says to stop.** Backlog mode is a loop, not a single pass. After each task, immediately pick the next one and start it; don't pause to report, summarize, or ask whether to continue. Stop only for an explicit user stop request or `docs/backlog/.stop`. If every remaining task looks blocked or done, don't exit: re-fetch `origin/main` and the branch list (merges may have unblocked tasks), re-read each skipped task to see whether a conservative version can be built (see "Build the conservative version"), and use `docs/backlog/` follow-ups and the "Verify before trusting" checks below to find more work. Missing local tooling (no tests, no Docker, no network) is not a reason to stop: build what you can, commit it, and say plainly in the commit message and report which checks you couldn't run. Don't pause, announce, or ask before moving on to the next task: the user wants it done without a prompt, so finish one and start the next in the same turn. Keep any required progress updates brief and continue working in the same turn; never make an update a checkpoint that waits for a reply. Give the full per-branch report (complete, partial with blocker, or untested) only when the user asks for it or ends the session.
 - **Pull requests (outside prototyping mode).** Pull request tooling may not be authenticated on every machine, so don't count on opening PRs from a session. Every pushed `backlog/*` branch must still end up with a PR: use the project's PR-opening command (see its docs) on a machine that is logged in to the right account, and write each branch's last commit message as the PR description. List every branch you pushed in your report so none are missed. If the project automates this (a CI workflow or make target that opens a PR per `backlog/*` branch), its docs say so.
-- **Never merge or push to `main`, and never deploy, unless prototyping mode is on.** Otherwise the user reviews and merges.
+- **Never merge or push to `main`, and never deploy, unless prototyping mode is on.** Otherwise the user reviews and merges. The one exception is the `write` and `groom` commands pushing `docs/backlog/` edits (see Special commands).
 
 ### Branch completion status
 
@@ -25,3 +25,23 @@ Update the trailer whenever work changes readiness. Inspect it with `git log -1 
 ### Verify before trusting
 
 Backlog and feature docs drift like any other doc. A "still unbuilt" note has turned out to be stale more than once because the fix had already shipped, and a checkmark can be wrong the other way. Check the code before believing either direction, and before deleting a task as already built.
+
+### Special commands
+
+There are four backlog commands. When the user's message is just "backlog", show this menu and wait for them to pick one:
+
+- `write`: capture new backlog items.
+- `groom`: refine the open backlog items.
+- `list`: show the open backlog items in a table.
+- `work`: work through the backlog.
+
+"backlog <command>" (for example "backlog list") skips the menu and runs that command.
+
+Only `work` is backlog mode. `write`, `groom` and `list` are interactive: they don't use the autonomous loop, the `docs/backlog/.stop` check, or `backlog/*` branches, and they never implement a task.
+
+- **`write`.** Interview the user about one new item at a time. For each, create a task file in `docs/backlog/` as described under Creating Backlog Items in [backlog.md](backlog.md) (kebab-case filename, objective, requirements, acceptance criteria). Then ask for the next item, and repeat until the user says they're done.
+- **`groom`.** Go through the files in `docs/backlog/` one at a time, highest priority first. For each, ask the user about its gaps: unclear requirements, missing acceptance criteria, priority, dependencies, and whether to split or drop it. Update that task file with their answers before moving to the next one. Finish with one item before raising questions about another.
+- **`list`.** Run `git fetch`, then print one table with a row per file in `docs/backlog/`. Columns: task (filename without extension), priority (`unset` if missing), `depends_on`, a one-line summary, and branch status. Take branch status from `origin/backlog/<task>`: its `Backlog-Status` trailer (see Branch completion status) and whether its copy of the task file has a `Blocked` or `Unverified` section (read it with `git show origin/backlog/<task>:docs/backlog/<file>`). Use `no branch` if the branch doesn't exist. This command changes nothing.
+- **`work`.** Same as the user saying "work on the backlog": start the loop described above. Picking `work` is the go-ahead, so don't ask for confirmation.
+
+**Saving `write` and `groom` edits.** When `write` or `groom` finishes (the user says they're done, or every item has been groomed), commit and push the changes straight to `main` without asking. This is an exception to "Never merge or push to `main`" below and to the "wait for the user to type commit" rule in [conventions.md](conventions.md), and it covers only changes under `docs/backlog/` made by these two commands. Fetch and rebase onto `origin/main` first, stage only `docs/backlog/` files, and use a `git log`-style commit message.
