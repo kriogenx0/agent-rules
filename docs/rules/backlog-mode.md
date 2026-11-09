@@ -37,6 +37,8 @@ There are four backlog commands. When the user's message is just "backlog", show
 
 "backlog <command>" (for example "backlog list") skips the menu and runs that command.
 
+**Asking in `write` and `groom`.** Where the agent's interface offers clickable multiple-choice questions (a decision card or an ask-the-user tool with options), ask each question that way, with two to four options and the recommended one marked, rather than as plain text the user has to type an answer to.
+
 Only `work` is backlog mode. `write`, `groom` and `list` are interactive: they don't use the autonomous loop, the `docs/backlog/.stop` check, or `backlog/*` branches, and they never implement a task.
 
 - **`write`.** Interview the user about one new item at a time. For each, create a task file in `docs/backlog/` as described under Creating Backlog Items in [backlog.md](backlog.md) (kebab-case filename, objective, requirements, acceptance criteria). Then ask for the next item, and repeat until the user says they're done.
