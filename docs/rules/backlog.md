@@ -11,11 +11,24 @@ The `/docs/backlog/` directory contains specifications for incomplete work. Each
 - Use YAML frontmatter for optional metadata such as `priority`, `depends_on`, and `components`.
 - Avoid modifying unrelated backlog files.
 
+### Priority
+
+Set `priority` in a task's frontmatter to one of four lowercase levels. Use no other values (no `high`/`low`, numbers, or uppercase `P1`).
+
+| Level | Meaning |
+| --- | --- |
+| `p0` | Urgent: something is broken or blocking other work. Do it before anything else. |
+| `p1` | High: the next things to do. |
+| `p2` | Normal: the default for ordinary work. |
+| `p3` | Low: nice to have, do when nothing higher is ready. |
+
+A task with no `priority` is treated as `p2` when ordering, and is shown as `unset` so grooming can fill it in. Wherever tasks are taken in priority order, take `p0` first and `p3` last. Skip tasks whose `depends_on` files are still in `docs/backlog/`. Break ties by filename, alphabetically.
+
 ### Picking Up Work
 
 1. Review `/docs/backlog/` for available tasks.
 2. Check task dependencies and any existing branches or pull requests to avoid duplicating work.
-3. Prefer high-priority tasks that can be completed independently.
+3. Prefer the highest-priority tasks (see Priority) that can be completed independently.
 4. Before starting, identify files and components likely to be affected.
 5. Avoid working on tasks that overlap with another agent's active changes.
 6. Use a dedicated Git branch or worktree for each task.
@@ -42,7 +55,7 @@ The `/docs/backlog/` directory contains specifications for incomplete work. Each
 
 ### Creating Backlog Items
 
-- Create a new Markdown file in `/docs/backlog/` for each new task.
+- Create a new Markdown file in `/docs/backlog/` for each new task, with a `priority` (see Priority).
 - Use a unique, descriptive filename rather than a numerical identifier.
 - Check for existing backlog items to avoid duplicates.
 - Split large tasks into smaller, independently executable tasks when practical.
