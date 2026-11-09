@@ -13,16 +13,18 @@ The `/docs/backlog/` directory contains specifications for incomplete work. Each
 
 ### Priority
 
-Set `priority` in a task's frontmatter to one of four lowercase levels. Use no other values (no `high`/`low`, numbers, or uppercase `P1`).
+Set `priority` in a task's frontmatter to one of six lowercase levels. Use no other values (no `high`/`low`, numbers, or uppercase `P1`).
 
 | Level | Meaning |
 | --- | --- |
-| `p0` | Urgent: something is broken or blocking other work. Do it before anything else. |
+| `p0` | Critical: something is broken or blocking other work. Do it before anything else. |
 | `p1` | High: the next things to do. |
-| `p2` | Normal: the default for ordinary work. |
-| `p3` | Low: nice to have, do when nothing higher is ready. |
+| `p2` | Medium: important, but not next. |
+| `p3` | Normal: the default for ordinary work. |
+| `p4` | Low: nice to have. |
+| `p5` | Someday: ideas to keep, done only when nothing higher is ready. |
 
-A task with no `priority` is treated as `p2` when ordering, and is shown as `unset` so grooming can fill it in. Wherever tasks are taken in priority order, take `p0` first and `p3` last. Skip tasks whose `depends_on` files are still in `docs/backlog/`. Break ties by filename, alphabetically.
+A task with no `priority` is treated as `p3` when ordering, and is shown as `unset` so grooming can fill it in. Wherever tasks are taken in priority order, take `p0` first and `p5` last. Skip tasks whose `depends_on` files are still in `docs/backlog/`. Break ties by filename, alphabetically.
 
 ### Picking Up Work
 
