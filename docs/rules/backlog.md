@@ -22,15 +22,17 @@ Set `priority` in a task's frontmatter to one of six lowercase levels. Use no ot
 | `p2` | Medium: important, but not next. |
 | `p3` | Normal: the default for ordinary work. |
 | `p4` | Low: nice to have. |
-| `p5` | Someday: ideas to keep, done only when nothing higher is ready. |
+| `p5` | Icebox: parked. Never picked up, groomed or listed one by one unless the user asks for that task by name. |
 
-A task with no `priority` is treated as `p3` when ordering, and is shown as `unset` so grooming can fill it in. Wherever tasks are taken in priority order, take `p0` first and `p5` last. Skip tasks whose `depends_on` files are still in `docs/backlog/`. Break ties by filename, alphabetically.
+A task with no `priority` is treated as `p3` when ordering, and is shown as `unset` so grooming can fill it in. Wherever tasks are taken in priority order, take `p0` first and `p4` last. Skip tasks whose `depends_on` files are still in `docs/backlog/`. Break ties by filename, alphabetically.
+
+`p5` tasks are not part of that order: leave them alone unless the user asks for a specific one.
 
 ### Picking Up Work
 
 1. Review `/docs/backlog/` for available tasks.
 2. Check task dependencies and any existing branches or pull requests to avoid duplicating work.
-3. Prefer the highest-priority tasks (see Priority) that can be completed independently.
+3. Prefer the highest-priority tasks (see Priority) that can be completed independently. Never pick up a `p5` (icebox) task unless the user asks for it.
 4. Before starting, identify files and components likely to be affected.
 5. Avoid working on tasks that overlap with another agent's active changes.
 6. Use a dedicated Git branch or worktree for each task.
