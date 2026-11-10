@@ -8,7 +8,7 @@ They apply to every page, feature and backlog task; a task isn't done until it m
 4. **View hierarchy: Global, then App, then View.** Libraries and global styles are the base, app-wide changes sit on top, and each view overrides what it inherits (see Styles in [frontend.md](frontend.md)).
 5. **Text never touches the edge of the viewport.** Text at the edge looks cut off; use margin or padding to keep it in.
 6. **Animations last 150ms to 300ms.** Under 150ms is too quick to notice as an animation. Over 300ms starts to feel slow, and over 500ms is annoying to wait for, so never go past it.
-7. **Hover and other state changes never change an element's size or position**, since that makes clicking glitchy. The only exception is when the hover or click mask stays the same.
+7. **Hover and other state changes never change an element's hover or click mask**, since a mask that moves or resizes under the cursor makes clicking glitchy. The visible element may grow or shrink on hover (for example with a `transform: scale()`), as long as the area that responds to hover and clicks stays exactly the same; anything that would shift layout or resize that area is not allowed.
 8. **UI text that no one would select isn't selectable**: buttons, dropdowns, icons.
 9. **Views only show things of value.** For example, don't show pagination when there's only one page.
 10. **No invisible masks or state changes.** The area where a control changes state (hover, click, mouse cursor) matches its visible boundary. For example, hovering or clicking anywhere inside a text field's border, including its padding, changes the text field's state.
