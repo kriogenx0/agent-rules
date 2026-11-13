@@ -35,6 +35,9 @@ API calls are organized by the API they integrate with. There is a base client, 
 
 ### Structure
 
+#### Component Library
+For a React frontend, [kriogenx0/volta](https://github.com/kriogenx0/volta) is the suggested UI library: React components in JSX with their own SCSS (buttons, form fields, modals, dropdowns, date pickers, loaders, navigation and more). Check it for a component before building one from scratch, and treat it as the Library layer in Styles above. A component that is missing or needs a change usually belongs in volta rather than in the app.
+
 #### UI Components
 Common recurring pieces (buttons, inputs, text fields, selects, dropdowns, checkboxes, radios, form elements, modals, panes, cards, and so on) live in their own files in a shared UI components folder. Before adding markup for one of these, use or extend the existing component.
 - Each component has its own stylesheet, and its own script when it needs one to work (a modal, not a button).

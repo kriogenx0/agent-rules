@@ -21,7 +21,7 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 - [project-settings.md](docs/rules/project-settings.md): the per-repo settings file (platforms, prototyping mode). Read first.
 - [conventions.md](docs/rules/conventions.md): general code, test, and git conventions.
 - [code-requirements.md](docs/rules/code-requirements.md): coding standards (DRY, data files, linting, folder structure, web app architecture).
-- [frontend.md](docs/rules/frontend.md): styles (SCSS), class names, UI components, views, API clients, accessibility.
+- [frontend.md](docs/rules/frontend.md): styles (SCSS), class names, the volta component library, UI components, views, API clients, accessibility.
 - [backend.md](docs/rules/backend.md): health checks, databases, initializers, routes, API.
 - [native.md](docs/rules/native.md): macOS and iOS apps, including their make targets.
 - [design-principles.md](docs/rules/design-principles.md): UI and interaction principles every page must meet.
