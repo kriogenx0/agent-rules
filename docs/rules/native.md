@@ -21,6 +21,7 @@ make close - kill the app. Only if native.
 make install - Build for production and install to /Applications folder.
 make uninstall - make close. Remove if installed.
 make reinstall - make uninstall, make install
+make install-open - make install, then open the installed app from /Applications. macOS only.
 
 # Help
 make all - default to run. Same as `make setup` and `make dev`
