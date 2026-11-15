@@ -2,6 +2,10 @@
 
 For macOS/iOS development.
 
+## Build directory
+
+macOS app builds go in `build/` at the repo root, not `.build/`. Point the build tools there instead of their defaults (for example `swift build --scratch-path build` or `xcodebuild -derivedDataPath build`), keep `build/` in `.gitignore`, and have `make dev`, `make open`, and `make install` use the app from `build/`.
+
 ## Makefile
 
 Every native app should have a make file.
@@ -10,7 +14,7 @@ Every native app should have a make file.
 # Building
 make dev - Build for development, close it if its open, delete old build, then open the new build.
 make build - Build for production.
-make clean - Clean existing builds.
+make clean - Clean existing builds. Removes `build/`.
 
 make setup - Setup the environment if needed.
 
