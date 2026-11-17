@@ -6,6 +6,10 @@ For macOS/iOS development.
 
 macOS app builds go in `build/` at the repo root, not `.build/`. Point the build tools there instead of their defaults (for example `swift build --scratch-path build` or `xcodebuild -derivedDataPath build`), keep `build/` in `.gitignore`, and have `make dev`, `make open`, and `make install` use the app from `build/`.
 
+## CI builds
+
+With [prototyping mode](prototyping-mode.md) on, GitHub Actions builds native apps only when a release is tagged, not on every push or pull request. Trigger the native build workflow on tag pushes (`on: push: tags: ['v*']`, matching the tags `make release` creates; see [versioning.md](versioning.md)) and drop its `push` and `pull_request` branch triggers. Other checks (tests, lint) still run as the project's CI defines. With prototyping mode off, leave the project's existing triggers alone.
+
 ## Makefile
 
 Every native app should have a make file.
