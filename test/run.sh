@@ -12,10 +12,12 @@ trap 'rm -rf "$WORK"' EXIT
 AR="$WORK/agent-rules"
 mkdir -p "$AR"
 cp -R "$SRC/bin" "$SRC/docs" "$SRC/global" "$SRC/templates" "$AR/"
+printf '# Changelog\n\n## Unreleased\n\n## v1.0.0 (2026-01-01)\n\n- First.\n' > "$AR/CHANGELOG.md"
 git -C "$AR" init -q && git -C "$AR" add -A && git -C "$AR" -c user.name=t -c user.email=t@t commit -qm init
 git -C "$AR" -c user.name=t -c user.email=t@t tag -a v1.0.0 -m v1.0.0
 CLI="$AR/bin/agent-rules"
 export CLAUDE_HOME="$WORK/home/.claude" CODEX_HOME="$WORK/home/.codex"
+export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
 
 PASS=0 FAIL=0
 ok() { PASS=$((PASS + 1)); }
@@ -99,21 +101,32 @@ expect "sync-all updates installed repos" grep -q "second upstream line" "$R/doc
 
 # ── releases ──
 tagged() { git -C "$AR" rev-parse -q --verify "refs/tags/$1" >/dev/null 2>&1; }
+unreleased() { awk -v l="$1" '$0 == "## Unreleased" { print; print ""; print l; next } { print }' "$AR/CHANGELOG.md" > "$WORK/cl" && mv "$WORK/cl" "$AR/CHANGELOG.md"; }
+expect_not "release refuses an empty Unreleased section" "$CLI" release
+expect_not "a refused release makes no tag" tagged v1.0.1
+unreleased "- A fix."
 echo "- uncommitted" >> "$AR/docs/rules/conventions.md"
 expect_not "release refuses a dirty tree" "$CLI" release
 git -C "$AR" checkout -q -- docs/rules/conventions.md
+git -C "$AR" commit -qam "fix"
 expect "release succeeds on a clean tree" "$CLI" release
 expect "patch release tags HEAD" tagged v1.0.1
 [ "$(git -C "$AR" rev-parse v1.0.1^{commit})" = "$(git -C "$AR" rev-parse HEAD)" ] && ok || bad "the tag is on HEAD"
+[ "$(git -C "$AR" log -1 --format=%s)" = "Release v1.0.1" ] && ok || bad "release commits the stamped changelog"
+expect "changelog gets the version heading" grep -q "^## v1.0.1 ([0-9-]*)$" "$AR/CHANGELOG.md"
+[ "$(sed -n '/^## Unreleased$/,/^## v1.0.1/p' "$AR/CHANGELOG.md" | grep -c '^- ')" = 0 ] && ok || bad "Unreleased is empty again"
+expect "the entry moves under the version" sh -c "sed -n '/^## v1.0.1/,/^## v1.0.0/p' '$AR/CHANGELOG.md' | grep -qx -- '- A fix.'"
+expect "the tag message carries the notes" sh -c "git -C '$AR' tag -l --format='%(contents)' v1.0.1 | grep -qx -- '- A fix.'"
 expect_not "release refuses an already-released commit" "$CLI" release
 echo "- third upstream line" >> "$AR/docs/rules/conventions.md"
-git -C "$AR" -c user.name=t -c user.email=t@t commit -qam change3
+unreleased "- A new rule."
+git -C "$AR" commit -qam change3
 expect_not "release rejects an unknown part" "$CLI" release huge
 expect "minor release succeeds" "$CLI" release minor
 expect "minor release resets the patch" tagged v1.1.0
 expect "version shows the latest tag" sh -c "'$CLI' version | grep -q '^1.1.0 ('"
 echo "- fourth upstream line" >> "$AR/docs/rules/conventions.md"
-git -C "$AR" -c user.name=t -c user.email=t@t commit -qam change4
+git -C "$AR" commit -qam change4
 expect "version counts commits past the tag" sh -c "'$CLI' version | grep -q '^1.1.0+1 ('"
 
 # ── global install ──

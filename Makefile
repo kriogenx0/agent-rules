@@ -46,7 +46,7 @@ sync-all: ## Sync every installed repo under ~/Sites (ROOT=dir to change)
 version: ## Print the rules version and commit
 	@$(CLI) version
 
-release: test ## Test, then tag the next version and push it: make release BUMP=patch|minor|major (default patch)
+release: test ## Test, stamp CHANGELOG.md, tag the next version and push: make release BUMP=patch|minor|major (default patch)
 	@$(CLI) release "$(BUMP)"
 
 ##@ Development

@@ -9,7 +9,7 @@
 #   agent-rules check    <repo>     report what `sync` would change (exit 1 if anything)
 #   agent-rules sync-all [root]     sync every repo under root (default ~/Sites) that was installed
 #   agent-rules version             print the rules version (latest v* tag) and commit
-#   agent-rules release [part]      tag HEAD with the next version (patch, minor or major) and push the tag
+#   agent-rules release [part]      stamp CHANGELOG.md, tag the next version (patch, minor or major) and push
 #
 # Repos get committed copies, not symlinks: agents working from a fresh clone
 # (cloud sessions, CI, backlog-mode runs) never see anything outside the repo,
@@ -262,12 +262,29 @@ cmd_sync_all() {
 
 # ── Releases ─────────────────────────────────────────────────────────────────
 
-# Tag HEAD with the next version (v<version>, annotated) and push the tag
-# when there's a remote. Refuses to run with uncommitted changes or on a
-# commit that is already released, so a release is always exactly a
-# committed tree. `make release` runs the tests first.
+CHANGELOG="$ROOT/CHANGELOG.md"
+
+# Print the entries under "## Unreleased" in CHANGELOG.md (nothing if empty).
+unreleased_notes() {
+  awk '/^## / { on = ($0 == "## Unreleased"); next } on && NF' "$CHANGELOG"
+}
+
+# Rename "## Unreleased" to "## v<version> (<date>)" and open a new, empty
+# Unreleased section above it.
+stamp_changelog() {
+  awk -v v="$1" -v d="$(date +%Y-%m-%d)" '
+    $0 == "## Unreleased" && !done { print; print ""; print "## v" v " (" d ")"; done = 1; next }
+    { print }
+  ' "$CHANGELOG" > "$CHANGELOG.tmp" && mv "$CHANGELOG.tmp" "$CHANGELOG"
+}
+
+# Commit the stamped CHANGELOG.md as "Release v<version>", tag that commit
+# (annotated, with the release notes as the message) and push the branch and
+# tag when there's a remote. Refuses uncommitted changes, an empty Unreleased
+# section, or a commit that is already released, so a release is always
+# exactly a committed tree. `make release` runs the tests first.
 cmd_release() {
-  local part="${1:-patch}" tag cur major minor patch next
+  local part="${1:-patch}" tag cur major minor patch next notes
   tag="$(latest_tag)" || tag="v0.0.0"
   cur="${tag#v}"
   [[ "$cur" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || die "latest tag is not semver: $tag"
@@ -281,11 +298,17 @@ cmd_release() {
   [ -z "$(git -C "$ROOT" status --porcelain)" ] || die "commit or stash your changes first; a release is a committed tree"
   [ "$(semver)" = "$cur" ] && [ "$tag" != v0.0.0 ] && die "HEAD is already released as $tag"
   git -C "$ROOT" rev-parse -q --verify "refs/tags/v$next" >/dev/null && die "tag v$next already exists"
-  git -C "$ROOT" tag -a "v$next" -m "agent-rules v$next"
+  [ -f "$CHANGELOG" ] || die "CHANGELOG.md is missing"
+  notes="$(unreleased_notes)"
+  [ -n "$notes" ] || die "add what changed under \"## Unreleased\" in CHANGELOG.md first"
+  stamp_changelog "$next"
+  git -C "$ROOT" add CHANGELOG.md
+  git -C "$ROOT" commit -q -m "Release v$next"
+  git -C "$ROOT" tag -a "v$next" -m "agent-rules v$next" -m "$notes"
   echo "Released agent-rules v$next ($cur -> $next)"
   if git -C "$ROOT" remote get-url origin >/dev/null 2>&1; then
-    git -C "$ROOT" push -q origin "v$next"
-    note "pushed tag v$next to origin"
+    git -C "$ROOT" push -q origin HEAD "v$next"
+    note "pushed the release commit and tag v$next to origin"
   fi
   note "run \`make sync-all\` to send it to every repo"
 }

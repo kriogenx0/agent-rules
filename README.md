@@ -36,11 +36,19 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 
 ## Versioning
 
-The rules are versioned by semver git tags (`v1.1.0`); there is no `VERSION` file. Each synced file's header records the version and commit it came from (`agent-rules@1.1.0 (abc1234)`, or `1.1.0+2` when synced from two commits past the tag), and installing into a repo shows it. `make version` prints the current one.
+The rules use semantic versioning: each release is a git tag (`v1.4.0`), and [CHANGELOG.md](CHANGELOG.md) says what changed in it. There is no `VERSION` file. Each synced file's header records the version and commit it came from (`agent-rules@1.4.0 (abc1234)`, or `1.4.0+2` when synced from two commits past the tag), and installing into a repo shows it. `make version` prints the current one. A repo can see which release it has from those headers, and what changed since from the changelog.
 
-Every commit that changes these shared rules must receive a version bump. After committing, run `make release` before considering the change finished; use a patch bump for fixes and wording, a minor bump for new or changed rules, and a major bump only at the author's direction. This requirement is specific to this repository.
+Which part to bump:
 
-`make release` is the only way to make a version. It runs the tests, tags the current commit with the next version, and pushes the tag. It refuses uncommitted changes and a commit that is already released. The default is a patch bump; pass `BUMP=minor` or `BUMP=major` for more. Then run `make sync-all` to send the release to every repo. As a guide: patch for fixes and wording, minor for new or changed rules, major is the author's call.
+- **Major** (`2.0.0`): a rule changes or drops behavior that agents or repos already rely on, so following the new rules means doing something differently (a renamed make target, a different branch flow, changed priority levels).
+- **Minor** (`1.5.0`): a new rule, or a new requirement added to an existing one, that doesn't break what agents already do.
+- **Patch** (`1.4.1`): wording, clarifications and fixes that don't change what agents do.
+
+When in doubt between two, pick the larger. The author can always make the call.
+
+Every commit that changes these shared rules adds a line under **Unreleased** in CHANGELOG.md in the same commit, and must receive a version bump: after committing, run `make release` before considering the change finished. This requirement is specific to this repository.
+
+`make release` is the only way to make a version. It runs the tests, renames the Unreleased section to the new version and date, commits that as `Release vX.Y.Z`, tags the commit with the release notes, and pushes the commit and the tag. It refuses uncommitted changes, an empty Unreleased section, and a commit that is already released. The default is a patch bump; pass `BUMP=minor` or `BUMP=major` for more. Then run `make sync-all` to send the release to every repo.
 
 ## Sources
 
