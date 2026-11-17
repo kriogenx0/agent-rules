@@ -12,6 +12,7 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 - Hover may resize an element if its hover/click mask stays the same.
 - **New:** Native: `make install-open` closes the running app and reopens it; macOS app builds go in `build/`, not `.build/`.
 - **New:** Native in prototyping mode: tests run locally after each commit and in CI; CI tests and builds apps only on release tags.
+- **New:** Rebase merges are always preferred, including for pull requests and auto-merge, and merged branches are deleted on `origin` and locally.
 - **New:** This repo keeps a changelog, and `make release` picks the version from it: major for Breaking entries, minor for New ones, patch otherwise.
 
 ## v1.4.0 (2026-11-08)
