@@ -8,7 +8,7 @@ macOS app builds go in `build/` at the repo root, not `.build/`. Point the build
 
 ## CI builds
 
-With [prototyping mode](prototyping-mode.md) on, GitHub Actions builds native apps only when a release is tagged, not on every push or pull request. Trigger the native build workflow on tag pushes (`on: push: tags: ['v*']`, matching the tags `make release` creates; see [versioning.md](versioning.md)) and drop its `push` and `pull_request` branch triggers. Other checks (tests, lint) still run as the project's CI defines. With prototyping mode off, leave the project's existing triggers alone.
+With [prototyping mode](prototyping-mode.md) on, GitHub Actions builds native apps only when a release is tagged, not on every push or pull request. Trigger the native build workflow on tag pushes (`on: push: tags: ['v*']`, matching the tags `make release` creates; see [versioning.md](versioning.md)) and drop its `push` and `pull_request` branch triggers. Tests run locally instead: run `make test` (or the project's test command) after each commit and before pushing, and don't run them in GitHub Actions on pushes or pull requests. Never push a commit whose tests fail. With prototyping mode off, leave the project's existing triggers alone.
 
 ## Makefile
 
