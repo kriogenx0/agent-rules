@@ -2,17 +2,17 @@
 
 What changed in each release of the shared rules, newest first. Versions are git tags (`v1.2.0`) made by `make release`; see [Versioning](README.md#versioning) for when to bump which part.
 
-Add a line under **Unreleased** in the same commit as the change, starting it with **Breaking:** when it needs a major bump. `make release` refuses to run while Unreleased is empty, then renames it to the new version and date.
+Add a line under **Unreleased** in the same commit as the change. Start it with **Breaking:** when it changes behavior agents rely on, or **New:** for a new rule or requirement; leave wording fixes unmarked. `make release` reads those marks to pick the version: any Breaking line makes a major release, else any New line a minor one, else a patch. It refuses to run while Unreleased is empty, then renames it to the new version and date.
 
 ## Unreleased
 
 - **Breaking:** backlog priorities are p0 to p5; p5 is the icebox, skipped by work and groom and only counted by list.
-- Design principle 13: prefer clear, familiar, monochrome icons over text; no emoji icons.
-- Frontend suggests the volta component library.
+- **New:** Design principle 13: prefer clear, familiar, monochrome icons over text; no emoji icons.
+- **New:** Frontend suggests the volta component library.
 - Hover may resize an element if its hover/click mask stays the same.
-- Native: `make install-open` closes the running app and reopens it; macOS app builds go in `build/`, not `.build/`.
-- Native in prototyping mode: tests run locally after each commit and in CI; CI tests and builds apps only on release tags.
-- This repo keeps a changelog, `make release` stamps it, and major bumps are for rule changes agents rely on.
+- **New:** Native: `make install-open` closes the running app and reopens it; macOS app builds go in `build/`, not `.build/`.
+- **New:** Native in prototyping mode: tests run locally after each commit and in CI; CI tests and builds apps only on release tags.
+- **New:** This repo keeps a changelog, and `make release` picks the version from it: major for Breaking entries, minor for New ones, patch otherwise.
 
 ## v1.4.0 (2026-11-08)
 

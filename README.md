@@ -46,9 +46,9 @@ Which part to bump:
 
 When in doubt between two, pick the larger. The author can always make the call.
 
-Every commit that changes these shared rules adds a line under **Unreleased** in CHANGELOG.md in the same commit, and must receive a version bump: after committing, run `make release` before considering the change finished. This requirement is specific to this repository.
+Every commit that changes these shared rules adds a line under **Unreleased** in CHANGELOG.md in the same commit, starting it with **Breaking:** for a major change or **New:** for a minor one (wording fixes stay unmarked), and must receive a version bump: after committing, run `make release` before considering the change finished. This requirement is specific to this repository.
 
-`make release` is the only way to make a version. It runs the tests, renames the Unreleased section to the new version and date, commits that as `Release vX.Y.Z`, tags the commit with the release notes, and pushes the commit and the tag. It refuses uncommitted changes, an empty Unreleased section, and a commit that is already released. The default is a patch bump; pass `BUMP=minor` or `BUMP=major` for more. Then run `make sync-all` to send the release to every repo.
+`make release` is the only way to make a version, and it picks the bump automatically from those marks: any Breaking entry makes a major release, else any New entry a minor one, else a patch. `BUMP=patch|minor|major` overrides it. It runs the tests, renames the Unreleased section to the new version and date, commits that as `Release vX.Y.Z`, tags the commit with the release notes, and pushes the commit and the tag. It refuses uncommitted changes, an empty Unreleased section, and a commit that is already released. Then run `make sync-all` to send the release to every repo.
 
 ## Sources
 

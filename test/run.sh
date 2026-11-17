@@ -119,15 +119,24 @@ expect "the entry moves under the version" sh -c "sed -n '/^## v1.0.1/,/^## v1.0
 expect "the tag message carries the notes" sh -c "git -C '$AR' tag -l --format='%(contents)' v1.0.1 | grep -qx -- '- A fix.'"
 expect_not "release refuses an already-released commit" "$CLI" release
 echo "- third upstream line" >> "$AR/docs/rules/conventions.md"
-unreleased "- A new rule."
+unreleased "- **New:** A new rule."
 git -C "$AR" commit -qam change3
 expect_not "release rejects an unknown part" "$CLI" release huge
-expect "minor release succeeds" "$CLI" release minor
+expect "a New entry makes a minor release" "$CLI" release
 expect "minor release resets the patch" tagged v1.1.0
 expect "version shows the latest tag" sh -c "'$CLI' version | grep -q '^1.1.0 ('"
 echo "- fourth upstream line" >> "$AR/docs/rules/conventions.md"
 git -C "$AR" commit -qam change4
 expect "version counts commits past the tag" sh -c "'$CLI' version | grep -q '^1.1.0+1 ('"
+unreleased "- **New:** Another rule."
+unreleased "- **Breaking:** A changed rule."
+git -C "$AR" commit -qam change5
+expect "a Breaking entry makes a major release" "$CLI" release
+expect "major release resets minor and patch" tagged v2.0.0
+unreleased "- **Breaking:** Not really."
+git -C "$AR" commit -qam change6
+expect "an explicit part overrides the changelog" "$CLI" release patch
+expect "explicit patch release" tagged v2.0.1
 
 # ── global install ──
 mkdir -p "$CLAUDE_HOME"; printf 'My own note.\n' > "$CLAUDE_HOME/CLAUDE.md"
