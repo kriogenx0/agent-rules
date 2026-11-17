@@ -23,7 +23,7 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 - [code-requirements.md](docs/rules/code-requirements.md): coding standards (DRY, data files, linting, folder structure, web app architecture).
 - [frontend.md](docs/rules/frontend.md): styles (SCSS), class names, the volta component library, UI components, views, API clients, accessibility.
 - [backend.md](docs/rules/backend.md): health checks, databases, initializers, routes, API.
-- [native.md](docs/rules/native.md): macOS and iOS apps, including their make targets and building in CI only on release tags in prototyping mode.
+- [native.md](docs/rules/native.md): macOS and iOS apps, including their make targets and running CI only on release tags in prototyping mode.
 - [design-principles.md](docs/rules/design-principles.md): UI and interaction principles every page must meet.
 - [documentation.md](docs/rules/documentation.md): where docs live and what they must cover.
 - [backlog.md](docs/rules/backlog.md): how backlog tasks (`docs/backlog/`) are written, picked up, and completed.
