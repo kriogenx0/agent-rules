@@ -2,11 +2,11 @@
 
 What changed in each release of the shared rules, newest first. Versions are git tags (`v1.2.0`) made by `make release`; see [Versioning](README.md#versioning) for when to bump which part.
 
-Add a line under **Unreleased** in the same commit as the change. `make release` refuses to run while Unreleased is empty, then renames it to the new version and date.
+Add a line under **Unreleased** in the same commit as the change, starting it with **Breaking:** when it needs a major bump. `make release` refuses to run while Unreleased is empty, then renames it to the new version and date.
 
 ## Unreleased
 
-- Backlog priorities are p0 to p5; p5 is the icebox, skipped by work and groom and only counted by list.
+- **Breaking:** backlog priorities are p0 to p5; p5 is the icebox, skipped by work and groom and only counted by list.
 - Design principle 13: prefer clear, familiar, monochrome icons over text; no emoji icons.
 - Frontend suggests the volta component library.
 - Hover may resize an element if its hover/click mask stays the same.
