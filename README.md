@@ -13,7 +13,7 @@ Each repo copies `docs/rules/` from here and keeps its own `docs/project/`. Its 
 
 Every repo also keeps `docs/project/settings.md` (start from [templates/settings.md](templates/settings.md)), which records:
 
-- **Platforms:** which of frontend, backend, mac, iOS the repo is for. Only rules for those platforms apply.
+- **Platforms:** which of frontend, backend, mac, iOS, audio-plugin the repo is for. Only rules for those platforms apply.
 - **Prototyping mode:** `on` means ordinary changes go directly to main; backlog tasks use branches, and completed ones merge to main automatically.
 
 ## Rules
@@ -24,6 +24,7 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 - [frontend.md](docs/rules/frontend.md): styles (SCSS), class names, the volta component library, UI components, views, API clients, accessibility.
 - [backend.md](docs/rules/backend.md): health checks, databases, initializers, routes, API.
 - [native.md](docs/rules/native.md): macOS and iOS apps, including their make targets and running CI only on release tags in prototyping mode.
+- [audio-plugins.md](docs/rules/audio-plugins.md): audio plugins: knobs and other controls, parameters, and the realtime audio thread.
 - [design-principles.md](docs/rules/design-principles.md): UI and interaction principles every page must meet.
 - [documentation.md](docs/rules/documentation.md): where docs live and what they must cover.
 - [backlog.md](docs/rules/backlog.md): how backlog tasks (`docs/backlog/`) are written, picked up, and completed.

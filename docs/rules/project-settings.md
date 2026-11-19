@@ -17,8 +17,9 @@ One or more of:
 - `backend`: a server or API, including one that renders pages.
 - `mac`: a native macOS app.
 - `iOS`: a native iOS app.
+- `audio-plugin`: an audio plugin (effect or instrument) and any host app that tests it. Listed alongside the platform it runs on, such as `mac`.
 
-Apply only the rules for the listed platforms: [backend.md](backend.md) for `backend`, [frontend.md](frontend.md) and [design-principles.md](design-principles.md) for `frontend`, and [native.md](native.md) plus the platform's own conventions (and the design principles, where they make sense natively) for `mac` and `iOS`. Platforms not listed are out of scope here; for example, don't add a backend to a `frontend`-only repo, and don't assume an iOS app lives in a `frontend` repo.
+Apply only the rules for the listed platforms: [backend.md](backend.md) for `backend`, [frontend.md](frontend.md) and [design-principles.md](design-principles.md) for `frontend`, and [native.md](native.md) plus the platform's own conventions (and the design principles, where they make sense natively) for `mac` and `iOS`, and [audio-plugins.md](audio-plugins.md) for `audio-plugin`. Platforms not listed are out of scope here; for example, don't add a backend to a `frontend`-only repo, and don't assume an iOS app lives in a `frontend` repo.
 
 ### Prototyping mode
 

@@ -15,6 +15,7 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 - **New:** Native in prototyping mode: tests run locally after each commit and in CI; CI tests and builds apps only on release tags.
 - **New:** Rebase merges are always preferred, including for pull requests and auto-merge, and merged branches are deleted on `origin` and locally.
 - **New:** This repo keeps a changelog, and `make release` picks the version from it: major for Breaking entries, minor for New ones, patch otherwise.
+- **New:** `audio-plugin` platform and audio-plugins.md: knobs (not sliders) for continuous parameters with exact value entry, controls through the plugin's parameter system, and realtime audio thread rules.
 
 ## v1.4.0 (2026-11-08)
 
