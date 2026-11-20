@@ -15,3 +15,4 @@ They apply to every page, feature and backlog task; a task isn't done until it m
 11. **Show that something is happening.** When the user is waiting on something, give a subtle indication that it's in progress.
 12. Common actions can use icons instead of text. Buttons with uncommon icons should have a tooltip to show the action or intent.
 13. **Icons are clear, familiar and monochrome.** Use icons where they are clear and familiar, and prefer a familiar icon over text. Use monochromatic icons that can match the text color. Emojis are never used as UI icons.
+14. **Simple and minimal is more functional.** Prefer fewer words, fewer icons and fewer controls on screen. Show the few things people use most, and put the rest one step away (a menu or a folded list) rather than on every page.
