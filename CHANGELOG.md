@@ -6,6 +6,8 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 
 ## Unreleased
 
+- **New:** Design principle 13: never use emojis as icons anywhere in the UI; emojis appear only in content people write, such as messages.
+
 ## v1.5.0 (2026-11-20)
 
 - **Breaking:** backlog priorities are p0 to p5; p5 is the icebox, skipped by work and groom and only counted by list.
