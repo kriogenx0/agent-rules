@@ -7,6 +7,7 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 ## Unreleased
 
 - **Breaking:** backlog priorities are p0 to p5; p5 is the icebox, skipped by work and groom and only counted by list.
+- **New:** Design principle 14: simple and minimal is more functional; every element earns its place.
 - **New:** Design principle 13: prefer clear, familiar, monochrome icons over text; no emoji icons.
 - **New:** Design principle 10: a control's whole visible boundary responds to every interaction (hover, click, tap, focus, cursor change) and nothing outside it does; focus rings and glows are drawn inside the box, and a frame around a native control forwards interactions to it.
 - **New:** Frontend suggests the volta component library.
