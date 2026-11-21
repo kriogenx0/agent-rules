@@ -23,6 +23,7 @@ For public sites whose job is to sell or explain a product, app or company: land
 - Show proof where it exists: real customer quotes with names, press mentions, ratings and user counts. Never invent them.
 - Focus on the product's value and its top features: what it does for the visitor and why that matters to them. Lead with the value, then show the few features that deliver it, each with a screenshot or video of it in use. Leave minor features, settings and internals for docs or a later page.
 - Copy is short and concrete: what the product does for the visitor, not a list of its internals.
+- For a closed-source app, the site never exposes intellectual property: say what the app does and what it's good at, never how proprietary features, algorithms, models or data pipelines work. This covers everything public, including copy, FAQ answers, `llms.txt`, structured data, alt text, video narration, image file names and source maps.
 
 ## Imagery and video
 
