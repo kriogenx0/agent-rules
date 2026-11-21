@@ -6,6 +6,8 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 
 ## Unreleased
 
+## v2.0.0 (2026-11-20)
+
 - **Breaking:** Design principle 14 is removed (principle 9 covers it). Principle 6 now has a hard cap of 300ms (was 500ms). Principles 1, 3, 5, 7, 8, 10, 11 and 12 now state exact sizes and tests (44px taps, 1920px displays, 12px edge margin), and drag is exempt from the box rule in principle 10.
 - **New:** When agent-rules is added to a repo, immediately audit the repo against the rules for its platforms and fix every violation (project-settings.md).
 - **New:** Design principle 13: the UI's own icons are never emojis; content people write or choose (text, messages, an emoji or image someone picks for their project) can use them.
