@@ -16,7 +16,10 @@ For public sites whose job is to sell or explain a product, app or company: land
 
 - The first screen says what the product is and who it's for in one headline and one short line under it, and shows the main call to action.
 - Each page has one main call to action (download, sign up, buy, contact) with a specific label, such as "Download for Mac" rather than "Learn more". It appears again further down long pages.
-- App store and download links go straight to the right store or file for the visitor's device where that can be detected, with the official store badges.
+- If the app can be downloaded, the site has a download link for it, usually as the main call to action. The file is served from blob storage (such as DigitalOcean Spaces or Amazon S3), behind a CDN where possible, not from the site's own server.
+  - The link points to a stable URL for the latest version (such as `/download/mac`) that redirects to the current file, so a new release never breaks it.
+  - Next to the button, show the version, file size and system requirements.
+- App store and download links go straight to the right store or file for the visitor's device where that can be detected, with the official store badges. Other platforms stay one click away.
 - Show proof where it exists: real customer quotes with names, press mentions, ratings and user counts. Never invent them.
 - Focus on the product's value and its top features: what it does for the visitor and why that matters to them. Lead with the value, then show the few features that deliver it, each with a screenshot or video of it in use. Leave minor features, settings and internals for docs or a later page.
 - Copy is short and concrete: what the product does for the visitor, not a list of its internals.
