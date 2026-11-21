@@ -6,7 +6,7 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 
 ## Unreleased
 
-- **New:** Design principle 13: never use emojis as icons anywhere in the UI; emojis appear only in content people write, such as messages.
+- **New:** Design principle 13: the UI's own icons are never emojis; content people write or choose (text, messages, an emoji or image someone picks for their project) can use them.
 
 ## v1.5.0 (2026-11-20)
 
