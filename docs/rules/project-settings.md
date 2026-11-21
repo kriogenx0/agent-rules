@@ -24,3 +24,15 @@ Apply only the rules for the listed platforms: [backend.md](backend.md) for `bac
 ### Prototyping mode
 
 `on` or `off` (default `off`). When `on`, [prototyping-mode.md](prototyping-mode.md) applies for every session in the repo: ordinary changes go directly to main without PRs; backlog tasks use branches, automatically merging completed tasks while keeping incomplete work on its branch. The user can also switch it on or off for one session by saying so; that overrides the file for that session only. Change the file only when the user asks.
+
+### When agent-rules is added to a repo
+
+Do this when the rules are installed into a repo that has no `docs/project/settings.md` yet. Re-syncing a repo that already has one doesn't count. Before any other work:
+
+1. Audit the existing code against every rule that applies to the repo's listed platforms, including the design principles for `frontend`.
+2. Fix every violation you find. Rules that can be checked objectively (sizes, durations, class names, make targets, file locations) must all be fixed; for judgment rules (such as minimal UI), fix what is clearly wrong.
+3. Run the repo's tests and checks to confirm nothing broke.
+4. Don't leave violations for later, and don't turn them into backlog tasks instead of fixing them.
+5. If a fix needs a decision from the user, or would change more than about 20 files, stop, list what remains, and ask.
+
+When an update to the rules adds or changes a requirement, audit only against the changed rules.
