@@ -13,7 +13,7 @@ Each repo copies `docs/rules/` from here and keeps its own `docs/project/`. Its 
 
 Every repo also keeps `docs/project/settings.md` (start from [templates/settings.md](templates/settings.md)), which records:
 
-- **Platforms:** which of frontend, backend, mac, iOS, audio-plugin the repo is for. Only rules for those platforms apply.
+- **Platforms:** which of frontend, backend, mac, iOS, audio-plugin, marketing-site the repo is for. Only rules for those platforms apply.
 - **Prototyping mode:** `on` means ordinary changes go directly to main; backlog tasks use branches, and completed ones merge to main automatically.
 
 ## Rules
@@ -25,7 +25,8 @@ Every repo also keeps `docs/project/settings.md` (start from [templates/settings
 - [backend.md](docs/rules/backend.md): health checks, databases, initializers, routes, API.
 - [native.md](docs/rules/native.md): macOS and iOS apps, including their make targets and running CI only on release tags, and only to test, in prototyping mode.
 - [audio-plugins.md](docs/rules/audio-plugins.md): audio plugins: knobs and other controls, parameters, and the realtime audio thread.
-- [design-principles.md](docs/rules/design-principles.md): UI and interaction principles every page must meet.
+- [marketing-sites.md](docs/rules/marketing-sites.md): marketing sites: creative design exempt from the design principles, screenshots, video and large imagery, SEO, GEO, sitemap, favicon, Open Graph, performance, calls to action and analytics.
+- [design-principles.md](docs/rules/design-principles.md): UI and interaction principles every app page must meet (marketing sites are exempt).
 - [documentation.md](docs/rules/documentation.md): where docs live and what they must cover.
 - [backlog.md](docs/rules/backlog.md): how backlog tasks (`docs/backlog/`) are written, picked up, and completed.
 - [backlog-mode.md](docs/rules/backlog-mode.md): the autonomous branch-per-task mode used when told to "work on the backlog".
