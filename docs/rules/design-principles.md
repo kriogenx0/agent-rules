@@ -1,6 +1,6 @@
 ## Design Principles
 
-These apply to every page, feature and backlog task. A task isn't done until it meets them. If the app has no UI, ignore them.
+These apply to every page, feature and backlog task. A task isn't done until it meets them. If the app has no UI, ignore them. Marketing sites are exempt; they follow [marketing-sites.md](marketing-sites.md) instead.
 
 ### 1. Responsive on all devices
 
