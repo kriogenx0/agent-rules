@@ -28,6 +28,7 @@ For public sites whose job is to sell or explain a product, app or company: land
 - Otherwise, prefer large photos and other free imagery over small decorative graphics. Use only images licensed for commercial use (public domain or free-license sources such as Unsplash and Pexels), note each image's source and license next to it in the repo, and credit it on the site when the license asks for that.
 - Videos autoplay only when muted, loop, play inline, and have a poster image. A video with speech has captions.
 - Images are optimized: modern formats (AVIF or WebP) with a fallback, responsive `srcset` sizes, and `width` and `height` set so nothing shifts as they load. Images below the first screen are lazy-loaded; the first screen's main image is not.
+- The logo is shown as the bare mark or wordmark, preferably without the typical rounded-corner app icon tile behind it. Use the tile only where an app icon is expected, such as next to a store badge.
 - Every meaningful image has alt text. Decorative images have an empty `alt`.
 
 ## Performance
