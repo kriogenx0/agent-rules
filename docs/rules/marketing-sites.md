@@ -50,7 +50,9 @@ For public sites whose job is to sell or explain a product, app or company: land
 - Pages use semantic HTML (`header`, `nav`, `main`, `section`, `footer`) and describe the product with structured data in JSON-LD: `Organization` and `WebSite`, plus `SoftwareApplication` or `Product` for what's being sold and `FAQPage` for a FAQ.
 - Links between pages are normal `<a href>` links with descriptive text.
 - `robots.txt` exists at the root and points to the sitemap. Preview and staging deployments are `noindex`.
-- There is a real 404 page that returns a 404 status and links back home.
+- There is a real 404 page that returns a 404 status and links back home. Moved pages return 301, never a 200 or a redirect to the home page.
+- Every internal and outbound link resolves: `make test` crawls the built site for broken links.
+- After each deploy, check the production canonical host, `robots.txt` and sitemap, not only the local build.
 
 ## GEO (generative engine optimization)
 

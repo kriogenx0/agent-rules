@@ -6,6 +6,7 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 
 ## Unreleased
 
+- Marketing sites: broken links are checked in `make test`, and the canonical host, `robots.txt` and sitemap are checked against production after each deploy.
 - **New:** `marketing-site` platform and marketing-sites.md: creative design exempt from the design principles, server-side rendering, a focus on the app's value and top features, app screenshots and video or large free imagery, SEO, GEO (`llms.txt`, quotable facts, AI crawlers allowed), a generated sitemap, favicons, Open Graph, performance, calls to action, analytics and privacy, and forms.
 
 ## v2.0.0 (2026-11-20)
