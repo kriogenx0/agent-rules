@@ -6,6 +6,8 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 
 ## Unreleased
 
+## v2.1.0 (2026-11-24)
+
 - **New:** Native in prototyping mode: CI on release tags only tests the app and never builds it; build native apps locally.
 - **New:** Marketing sites: screenshots can be cropped to one part of the app, logos prefer the bare mark over the rounded app icon tile, downloadable apps get a download link served from blob storage, and closed-source sites never expose how proprietary features work.
 - Marketing sites: broken links are checked in `make test`, and the canonical host, `robots.txt` and sitemap are checked against production after each deploy.
