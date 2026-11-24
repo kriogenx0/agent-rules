@@ -6,6 +6,8 @@ Add a line under **Unreleased** in the same commit as the change. Start it with 
 
 ## Unreleased
 
+- **New:** Native in prototyping mode: CI on release tags only tests the app and never builds it; build native apps locally.
+- **New:** Marketing sites: screenshots can be cropped to one part of the app, logos prefer the bare mark over the rounded app icon tile, downloadable apps get a download link served from blob storage, and closed-source sites never expose how proprietary features work.
 - Marketing sites: broken links are checked in `make test`, and the canonical host, `robots.txt` and sitemap are checked against production after each deploy.
 - **New:** `marketing-site` platform and marketing-sites.md: creative design exempt from the design principles, server-side rendering, a focus on the app's value and top features, app screenshots and video or large free imagery, SEO, GEO (`llms.txt`, quotable facts, AI crawlers allowed), a generated sitemap, favicons, Open Graph, performance, calls to action, analytics and privacy, and forms.
 
